@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <title>Doce Graça | Painel de Pedidos</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --vinho: #7f1110;
+        --vinho-escuro: #6d0e0d;
+        --offwhite: #ffffe3;
+        --offwhite-suave: rgba(255, 255, 227, 0.78);
+        --borda: rgba(255, 255, 227, 0.22);
+        --borda-forte: rgba(255, 255, 227, 0.34);
+        --fundo-card: rgba(255, 255, 227, 0.045);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--vinho);
+        color: var(--offwhite);
+        font-family: "Cormorant Garamond", Georgia, serif;
+      }
+
+      button,
+      select {
+        font-family: "Cormorant Garamond", Georgia, serif;
+        cursor: pointer;
+      }
+
+      .container {
+        width: min(1000px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 72px;
+      }
+
+      header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 8px;
+      }
+
+      h1 {
+        font-size: clamp(2.2rem, 4vw, 3rem);
+        font-weight: 500;
+      }
+
+      .subtitle {
+        color: var(--offwhite-suave);
+        font-size: 1.1rem;
+        margin-top: 4px;
+      }
+
+      .refresh-btn {
+        padding: 12px 20px;
+        border: 1px solid var(--borda-forte);
+        border-radius: 14px;
+        background: transparent;
+        color: var(--offwhite);
+        font-size: 1.05rem;
+        font-weight: 600;
+        transition: 0.2s ease;
+      }
+
+      .refresh-btn:hover {
+        background: var(--offwhite);
+        color: var(--vinho);
+      }
+
+      /* RESUMO */
+
+      .summary-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px;
+        margin: 24px 0;
+      }
+
+      .summary-card {
+        padding: 14px 16px;
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        background: var(--fundo-card);
+        text-align: center;
+      }
+
+      .summary-card strong {
+        display: block;
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+
+      .summary-card span {
+        font-size: 0.9rem;
+        color: var(--offwhite-suave);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* FILTROS */
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+
+      .filter-btn {
+        padding: 9px 16px;
+        border: 1px solid var(--borda);
+        border-radius: 999px;
+        background: transparent;
+        color: var(--offwhite);
+        font-size: 0.98rem;
+        font-weight: 600;
+        transition: 0.2s ease;
+      }
+
+      .filter-btn:hover {
+        background: rgba(255, 255, 227, 0.08);
+      }
+
+      .filter-btn.active {
+        background: var(--offwhite);
+        color: var(--vinho);
+        border-color: var(--offwhite);
+      }
+
+      .bulk-actions {
+        margin-bottom: 24px;
+      }
+
+      .danger-btn {
+        padding: 10px 16px;
+        border: 1px solid rgba(255, 208, 208, 0.5);
+        border-radius: 12px;
+        background: transparent;
+        color: #ffd0d0;
+        font-size: 0.98rem;
+        font-weight: 600;
+        transition: 0.2s ease;
+      }
+
+      .danger-btn:hover {
+        background: rgba(255, 208, 208, 0.12);
+      }
+
+      /* LISTA DE PEDIDOS */
+
+      .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .empty-state {
+        padding: 48px 20px;
+        text-align: center;
+        color: var(--offwhite-suave);
+        font-size: 1.15rem;
+        border: 1px dashed var(--borda);
+        border-radius: 20px;
+      }
+
+      .order-card {
+        border: 1px solid var(--borda);
+        border-radius: 20px;
+        background: var(--fundo-card);
+        padding: 20px 22px;
+      }
+
+      .order-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .order-customer {
+        font-size: 1.35rem;
+        font-weight: 600;
+      }
+
+      .order-meta {
+        color: var(--offwhite-suave);
+        font-size: 0.95rem;
+        margin-top: 2px;
+      }
+
+      .order-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .badge {
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      .badge-source-whatsapp {
+        background: rgba(120, 220, 160, 0.18);
+        color: #a9f0c4;
+        border: 1px solid rgba(120, 220, 160, 0.35);
+      }
+
+      .badge-source-online {
+        background: rgba(140, 190, 255, 0.18);
+        color: #b9d7ff;
+        border: 1px solid rgba(140, 190, 255, 0.35);
+      }
+
+      .badge-status {
+        background: rgba(255, 255, 227, 0.12);
+        color: var(--offwhite);
+        border: 1px solid var(--borda-forte);
+      }
+
+      .order-body {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 18px;
+      }
+
+      .order-items {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 1.02rem;
+      }
+
+      .order-items .item-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .order-items .item-row span:first-child {
+        color: var(--offwhite-suave);
+      }
+
+      .order-total {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 227, 0.14);
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      .order-info {
+        font-size: 0.98rem;
+        line-height: 1.55;
+        color: var(--offwhite-suave);
+      }
+
+      .order-info strong {
+        color: var(--offwhite);
+        font-weight: 600;
+      }
+
+      .order-notes {
+        margin-top: 6px;
+        font-style: italic;
+      }
+
+      .order-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 227, 0.1);
+      }
+
+      .status-select {
+        padding: 10px 14px;
+        border: 1px solid var(--borda-forte);
+        border-radius: 12px;
+        background: rgba(255, 255, 245, 0.98);
+        color: #4b2222;
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      .remove-btn {
+        padding: 9px 16px;
+        border: 1px solid rgba(255, 208, 208, 0.5);
+        border-radius: 12px;
+        background: transparent;
+        color: #ffd0d0;
+        font-size: 0.98rem;
+        font-weight: 600;
+        transition: 0.2s ease;
+      }
+
+      .remove-btn:hover {
+        background: rgba(255, 208, 208, 0.12);
+      }
+
+      .loading,
+      .error-state {
+        text-align: center;
+        padding: 40px 0;
+        color: var(--offwhite-suave);
+        font-size: 1.1rem;
+      }
+
+      .error-state {
+        color: #ffd0d0;
+      }
+
+      @media (max-width: 640px) {
+        .order-body {
+          grid-template-columns: 1fr;
+        }
+
+        .order-actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .status-select,
+        .remove-btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <div>
+          <h1>Painel de Pedidos</h1>
+          <div class="subtitle">Doce Graça — encomendas recebidas</div>
+        </div>
+
+        <button class="refresh-btn" id="refreshBtn" type="button">
+          Atualizar
+        </button>
+      </header>
+
+      <div class="summary-row" id="summaryRow"></div>
+
+      <div class="filters" id="filters"></div>
+
+      <div class="bulk-actions">
+        <button class="danger-btn" id="clearDeliveredBtn" type="button">
+          Apagar pedidos entregues
+        </button>
+      </div>
+
+      <div id="content">
+        <div class="loading">Carregando pedidos...</div>
+      </div>
+    </div>
+
+    <script>
+      const ordersEndpoint = "/.netlify/functions/orders";
+
+      const STATUSES = [
+        "Novo pedido",
+        "Pago online",
+        "Em preparo",
+        "Pronto",
+        "Entregue",
+      ];
+
+      const content = document.getElementById("content");
+      const summaryRow = document.getElementById("summaryRow");
+      const filtersEl = document.getElementById("filters");
+      const refreshBtn = document.getElementById("refreshBtn");
+      const clearDeliveredBtn = document.getElementById("clearDeliveredBtn");
+
+      let orders = [];
+      let currentFilter = "Todos";
+
+      function money(value) {
+        return Number(value || 0).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
+      }
+
+      function formatDate(iso) {
+        try {
+          return new Date(iso).toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        } catch {
+          return iso || "";
+        }
+      }
+
+      function formatDesiredDate(value) {
+        if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return value || "—";
+
+        const [year, month, day] = value.split("-");
+
+        return `${day}/${month}/${year}`;
+      }
+
+      async function fetchOrders() {
+        content.innerHTML = '<div class="loading">Carregando pedidos...</div>';
+
+        try {
+          const response = await fetch(ordersEndpoint);
+
+          let data;
+
+          try {
+            data = await response.json();
+          } catch {
+            throw new Error("O servidor retornou uma resposta inválida.");
+          }
+
+          if (!response.ok) {
+            throw new Error(data.error || "Não foi possível carregar os pedidos.");
+          }
+
+          orders = Array.isArray(data.orders) ? data.orders : [];
+
+          renderSummary();
+          renderFilters();
+          renderOrders();
+        } catch (error) {
+          console.error("Erro ao carregar pedidos:", error);
+
+          content.innerHTML = `<div class="error-state">Erro ao carregar pedidos: ${
+            error.message || "erro desconhecido"
+          }</div>`;
+        }
+      }
+
+      function renderSummary() {
+        const counts = { Todos: orders.length };
+
+        STATUSES.forEach((status) => {
+          counts[status] = orders.filter((order) => order.status === status).length;
+        });
+
+        summaryRow.innerHTML = `
+          <div class="summary-card">
+            <strong>${counts.Todos}</strong>
+            <span>Total</span>
+          </div>
+          ${STATUSES.map(
+            (status) => `
+            <div class="summary-card">
+              <strong>${counts[status]}</strong>
+              <span>${status}</span>
+            </div>
+          `,
+          ).join("")}
+        `;
+      }
+
+      function renderFilters() {
+        const options = ["Todos", ...STATUSES];
+
+        filtersEl.innerHTML = options
+          .map(
+            (option) => `
+            <button
+              class="filter-btn${option === currentFilter ? " active" : ""}"
+              data-filter="${option}"
+              type="button"
+            >
+              ${option}
+            </button>
+          `,
+          )
+          .join("");
+
+        filtersEl.querySelectorAll("[data-filter]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            currentFilter = btn.dataset.filter;
+            renderFilters();
+            renderOrders();
+          });
+        });
+      }
+
+      function renderOrders() {
+        const filtered =
+          currentFilter === "Todos"
+            ? orders
+            : orders.filter((order) => order.status === currentFilter);
+
+        if (filtered.length === 0) {
+          content.innerHTML =
+            '<div class="empty-state">Nenhum pedido por aqui.</div>';
+          return;
+        }
+
+        content.innerHTML = `<div class="orders-list" id="ordersList"></div>`;
+
+        const list = document.getElementById("ordersList");
+
+        filtered.forEach((order) => {
+          const card = document.createElement("div");
+          card.className = "order-card";
+
+          const itemsHtml = (order.items || [])
+            .map(
+              (item) => `
+              <div class="item-row">
+                <span>${item.quantity}× ${item.name || item.productId}</span>
+                <strong>${money((item.unitPrice || 0) * item.quantity)}</strong>
+              </div>
+            `,
+            )
+            .join("");
+
+          const isDelivery = order.customer?.deliveryType === "Delivery";
+
+          card.innerHTML = `
+            <div class="order-top">
+              <div>
+                <div class="order-customer">${order.customer?.name || "Sem nome"}</div>
+                <div class="order-meta">${formatDate(order.createdAt)}</div>
+              </div>
+
+              <div class="order-badges">
+                <span class="badge ${
+                  order.source === "online"
+                    ? "badge-source-online"
+                    : "badge-source-whatsapp"
+                }">
+                  ${order.source === "online" ? "Pago online" : "WhatsApp"}
+                </span>
+                <span class="badge badge-status">${order.status}</span>
+              </div>
+            </div>
+
+            <div class="order-body">
+              <div class="order-items">
+                ${itemsHtml}
+                <div class="order-total">
+                  <span>Total</span>
+                  <span>${money(order.total)}</span>
+                </div>
+              </div>
+
+              <div class="order-info">
+                <div><strong>Telefone:</strong> ${order.customer?.phone || "—"}</div>
+                <div><strong>Recebimento:</strong> ${order.customer?.deliveryType || "—"}</div>
+                ${
+                  isDelivery
+                    ? `<div><strong>Endereço:</strong> ${order.customer?.address || "—"}</div>
+                       ${
+                         order.customer?.reference
+                           ? `<div><strong>Referência:</strong> ${order.customer.reference}</div>`
+                           : ""
+                       }`
+                    : ""
+                }
+                <div><strong>Data desejada:</strong> ${formatDesiredDate(order.customer?.desiredDate)}</div>
+                ${
+                  order.customer?.notes
+                    ? `<div class="order-notes">"${order.customer.notes}"</div>`
+                    : ""
+                }
+              </div>
+            </div>
+
+            <div class="order-actions">
+              <select class="status-select" data-id="${order.id}">
+                ${STATUSES.map(
+                  (status) => `
+                  <option value="${status}" ${status === order.status ? "selected" : ""}>
+                    ${status}
+                  </option>
+                `,
+                ).join("")}
+              </select>
+
+              <button class="remove-btn" data-id="${order.id}" type="button">
+                Apagar pedido
+              </button>
+            </div>
+          `;
+
+          list.appendChild(card);
+        });
+
+        list.querySelectorAll(".status-select").forEach((select) => {
+          select.addEventListener("change", () => {
+            updateStatus(select.dataset.id, select.value);
+          });
+        });
+
+        list.querySelectorAll(".remove-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            deleteOrder(button.dataset.id);
+          });
+        });
+      }
+
+      async function updateStatus(id, status) {
+        try {
+          const response = await fetch(ordersEndpoint, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status }),
+          });
+
+          let data;
+
+          try {
+            data = await response.json();
+          } catch {
+            throw new Error("O servidor retornou uma resposta inválida.");
+          }
+
+          if (!response.ok) {
+            throw new Error(data.error || "Não foi possível atualizar o status.");
+          }
+
+          const order = orders.find((item) => item.id === id);
+          if (order) order.status = status;
+
+          renderSummary();
+          renderFilters();
+          renderOrders();
+        } catch (error) {
+          console.error("Erro ao atualizar status:", error);
+          alert("Erro ao atualizar status: " + (error.message || "erro desconhecido"));
+          fetchOrders();
+        }
+      }
+
+      async function deleteOrder(id) {
+        if (!confirm("Tem certeza que deseja apagar este pedido? Essa ação não pode ser desfeita.")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${ordersEndpoint}?id=${encodeURIComponent(id)}`,
+            { method: "DELETE" },
+          );
+
+          let data;
+
+          try {
+            data = await response.json();
+          } catch {
+            throw new Error("O servidor retornou uma resposta inválida.");
+          }
+
+          if (!response.ok) {
+            throw new Error(data.error || "Não foi possível apagar o pedido.");
+          }
+
+          orders = orders.filter((order) => order.id !== id);
+
+          renderSummary();
+          renderFilters();
+          renderOrders();
+        } catch (error) {
+          console.error("Erro ao apagar pedido:", error);
+          alert("Erro ao apagar pedido: " + (error.message || "erro desconhecido"));
+        }
+      }
+
+      async function clearDelivered() {
+        const delivered = orders.filter((order) => order.status === "Entregue");
+
+        if (delivered.length === 0) {
+          alert("Não há pedidos entregues para apagar.");
+          return;
+        }
+
+        if (
+          !confirm(
+            `Apagar ${delivered.length} pedido(s) marcado(s) como "Entregue"? Essa ação não pode ser desfeita.`,
+          )
+        ) {
+          return;
+        }
+
+        clearDeliveredBtn.disabled = true;
+        clearDeliveredBtn.textContent = "Apagando...";
+
+        try {
+          for (const order of delivered) {
+            await fetch(`${ordersEndpoint}?id=${encodeURIComponent(order.id)}`, {
+              method: "DELETE",
+            });
+          }
+
+          await fetchOrders();
+        } catch (error) {
+          console.error("Erro ao apagar pedidos entregues:", error);
+          alert("Erro ao apagar pedidos entregues: " + (error.message || "erro desconhecido"));
+        } finally {
+          clearDeliveredBtn.disabled = false;
+          clearDeliveredBtn.textContent = "Apagar pedidos entregues";
+        }
+      }
+
+      refreshBtn.addEventListener("click", fetchOrders);
+      clearDeliveredBtn.addEventListener("click", clearDelivered);
+
+      fetchOrders();
+    </script>
+  </body>
+</html>
